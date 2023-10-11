@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using TelnetInfo.Core;
 using TelnetTS.Helper;
@@ -13,13 +14,9 @@ namespace TelnetTS.MVVM.Model
     {
         private string User => ProviderEdge.User;
         private string Pass => ProviderEdge.Pass;
-
-        private Dictionary<int, string> KZN => ProviderEdge.KZN;
-        private Dictionary<int, string> CHE => ProviderEdge.CHE;
-        private Dictionary<int, string> ALM => ProviderEdge.ALM;
+        private Dictionary<int, string> ListPE { get; set; }
 
         private string Login { get; set; }
-
         public string Nas
         {
             get => nas;
@@ -63,9 +60,7 @@ namespace TelnetTS.MVVM.Model
 
         public SessionData()
         {
-            if (TClient != null && TClient.IsConneted)
-                TClient.Disconnect();
-            IsSuccess = false;
+            //
         }
         public SessionData(string nas, string login, string result)
         {
@@ -79,21 +74,24 @@ namespace TelnetTS.MVVM.Model
             int.TryParse(number, out int id);
             if (str.Contains("KZN"))
             {
-                Nas = nameof(KZN);
+                ListPE = ProviderEdge.KZN;
+                Nas = nameof(ProviderEdge.KZN);
                 NasId = id;
-                IP = KZN.FirstOrDefault(x => x.Key == id).Value;
+                IP = ListPE.FirstOrDefault(x => x.Key == id).Value;
             }
             else if (str.Contains("CHE"))
             {
-                Nas = nameof(CHE);
+                ListPE = ProviderEdge.CHE;
+                Nas = nameof(ProviderEdge.CHE);
                 NasId = id;
-                IP = CHE.FirstOrDefault(x => x.Key == id).Value;
+                IP = ListPE.FirstOrDefault(x => x.Key == id).Value;
             }
             else if (str.Contains("ALM"))
             {
-                Nas = nameof(ALM);
+                ListPE = ProviderEdge.ALM;
+                Nas = nameof(ProviderEdge.ALM);
                 NasId = id;
-                IP = ALM.FirstOrDefault(x => x.Key == id).Value;
+                IP = ListPE.FirstOrDefault(x => x.Key == id).Value;
             }
             else
                 IP = null;
@@ -128,11 +126,10 @@ namespace TelnetTS.MVVM.Model
             }
             catch
             {
-                IsSuccess = false;
-                LogsAdd("Ошибка при подключению к оборудованию.");
+                LogsAdd($"Ошибка при подключению к {Nas}_{NasId}");
             }
         }
-        //Check
+        //Check`
         private async Task CheckRequest()
         {
             try
@@ -156,6 +153,9 @@ namespace TelnetTS.MVVM.Model
                 var line = await TClient.ReadAsync();
                 if (line == null) break;
 
+                if(line.Contains("show subscriber session username"))
+                    Copy.AppendLine(line);
+
                 TelnetResponse += line;
                 if (line.Contains("authen") || IsActive)
                 {
@@ -176,6 +176,7 @@ namespace TelnetTS.MVVM.Model
                     }
                     else if (line.Contains("L4R_NOBALANCE_SERVICE2") || line.Contains("ISG_OGARDEN_SERVICE2"))
                         isReseted = true;
+                    Copy.AppendLine(line);
                 }
             }
             if (isReseted)
@@ -185,6 +186,11 @@ namespace TelnetTS.MVVM.Model
             }
         }
 
+        public ICommand CopyCommand =>
+            new RelayCommand((obj) =>
+            {
+                Clipboard.SetText(Copy.ToString());
+            }, (obj) => !IsBusy && !string.IsNullOrEmpty(Copy.ToString()));
         public ICommand ResetRequestCommand =>
             new RelayCommand(async (obj) =>
             {
@@ -200,43 +206,49 @@ namespace TelnetTS.MVVM.Model
         public ICommand RefreshRequestCommand =>
             new RelayCommand(async (obj) =>
             {
+                IsBusy = true;
+                Copy.Clear();
+                LogsClear();
+
                 IsActive = false;
                 Rate = 0;
                 IPv4 = "-";
                 UpTime = new TimeSpan();
-                LogsClear();
-                await CheckRequest();
-                AddTimeToTimer(min: 5);
 
-            }, (obj) => !IsBusy && IsSuccess && !string.IsNullOrEmpty(IP) && IP != "-" && TClient.IsConneted);
-        public ICommand FindRequestCommand =>
-            new RelayCommand(async (obj) =>
-            {
-                var list = new Dictionary<int, string>();
-                switch (Nas)
+                if (IsSuccess && TClient.IsConneted)
                 {
-                    case "KZN":
-                        list = KZN; break;
-                    case "CHE":
-                        list = CHE; break;
-                    case "ALM":
-                        list = ALM; break;
-                }
-
-                foreach (var e in list)
-                {
-                    IsSuccess = true;
-                    NasId = e.Key;
-                    IP = e.Value;
-                    await Connection();
                     await CheckRequest();
                     if (IsActive)
-                        break;
-                    else
-                        Disconnect();
+                    {
+                        AddTimeToTimer(min: 5);
+                        IsBusy = false;
+                        return;
+                    }
                 }
-                if (!IsActive)
-                    LogsAdd("Сессия не найдена.", false);
-            }, (obj) => !IsActive && !IsBusy && !string.IsNullOrEmpty(Nas) && Nas != "-");
+
+                var res = MessageBox.Show(
+                    $"Сессия в {Nas}_{NasId} не проверена.\n\nНачать поиск на всех PE в этой зоне?", "Поиск сессии",
+                    MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (res == MessageBoxResult.Yes)
+                {
+                    foreach (var e in ListPE)
+                    {
+                        IsSuccess = true;
+                        NasId = e.Key;
+                        IP = e.Value;
+                        await Connection();
+                        await CheckRequest();
+                        if (IsActive)
+                            break;
+                        else
+                            Disconnect();
+                    }
+                    if (!IsActive)
+                        LogsAdd($"Сессия в зоне '{Nas}' не найдена.", false);
+                }
+                IsBusy = false;
+
+            }, (obj) => !IsBusy && !string.IsNullOrEmpty(Nas) && Nas != "-");
     }
 }
