@@ -69,6 +69,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="MVVM\View\IncidentWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MVVM\View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -91,6 +95,8 @@
     <Compile Include="Helper\TimeSpanParser.cs" />
     <Compile Include="MVVM\Model\BaseModel.cs" />
     <Compile Include="MVVM\Model\ConnectPoint.cs" />
+    <Compile Include="MVVM\Model\IncidentData.cs" />
+    <Compile Include="MVVM\Model\Equipment.cs" />
     <Compile Include="MVVM\Model\LoadedData.cs" />
     <Compile Include="MVVM\Model\MacAddressInfo.cs" />
     <Compile Include="MVVM\Model\ProviderEdge.cs" />
@@ -99,6 +105,9 @@
     <Compile Include="MVVM\ViewModel\MainViewModel.cs" />
     <Compile Include="MVVM\View\ConsoleWindow.xaml.cs">
       <DependentUpon>ConsoleWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVM\View\IncidentWindow.xaml.cs">
+      <DependentUpon>IncidentWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="MVVM\View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -147,6 +156,9 @@
     </PackageReference>
     <PackageReference Include="ModernWpfUI">
       <Version>0.9.6</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.3</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

@@ -2,13 +2,19 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TelnetTS.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
+    <Setting Name="CompletionUpdate" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
     <Setting Name="UserName" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Password" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="PathExe" Type="System.String" Scope="User">
+    <Setting Name="PathSecureCRT" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="PathBase" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

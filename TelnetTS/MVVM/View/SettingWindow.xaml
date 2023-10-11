@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:TelnetTS.MVVM.View"
         xmlns:conv="clr-namespace:TelnetTS.Converters"
         mc:Ignorable="d" FontSize="12" ResizeMode="NoResize"
-        Title="Настройки ПМ" Height="255" Width="300"
-        WindowStartupLocation="CenterScreen"
+        Title="Settings" Height="255" Width="450"
+        WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown"
         xmlns:vm="clr-namespace:TelnetTS.MVVM.ViewModel"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         ui:WindowHelper.UseModernWindowStyle="False"
@@ -20,68 +20,103 @@
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <GroupBox Style="{DynamicResource none}" Margin="5 0 5 0" Padding="5">
-            <GroupBox.Header>
-                <TextBlock Text="Учетная запись от оборудование:" Style="{StaticResource BaseTextBlockStyle}"/>
-            </GroupBox.Header>
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto"/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <Grid.Resources>
-                    <Style TargetType="TextBlock" BasedOn="{StaticResource BodyTextBlockStyle}">
-                        <Setter Property="Margin" Value="1"/>
-                        <Setter Property="FontSize" Value="13"/>
-                        <Setter Property="TextAlignment" Value="Left"/>
-                        <Setter Property="VerticalAlignment" Value="Center"/>
-                    </Style>
-                </Grid.Resources>
-                <TextBlock Text="User name:" Grid.Row="0"/>
-                <TextBox Text="{Binding UserName}" Grid.Column="1" Grid.Row="0" Margin="5 0 0 2" />
-                <TextBlock Text="Password:" Grid.Row="1"/>
-                <TextBox Text="{Binding Password}" Grid.Column="1" Grid.Row="1" Margin="5 2 0 0"/>
-            </Grid>
-        </GroupBox>
-        <GroupBox Style="{DynamicResource none}" Grid.Row="1" Margin="5 0 5 0" Padding="5">
-            <GroupBox.Header>
-                <TextBlock Text="SecureCRT (опционально):" Style="{StaticResource BaseTextBlockStyle}"/>
-            </GroupBox.Header>
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto"/>
-                    <ColumnDefinition Width="auto"/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <Grid.Resources>
-                    <Style TargetType="TextBlock" BasedOn="{StaticResource BodyTextBlockStyle}">
-                        <Setter Property="Margin" Value="1"/>
-                        <Setter Property="FontSize" Value="13"/>
-                        <Setter Property="TextAlignment" Value="Left"/>
-                        <Setter Property="VerticalAlignment" Value="Center"/>
-                    </Style>
-                </Grid.Resources>
-                <TextBlock Text="{Binding IsPathExe, Converter={StaticResource BooleanToSymbolConverter}}" Grid.Row="0" Grid.Column="0"
-                           Foreground="{Binding IsPathExe, Converter={StaticResource BooleanToForegroundConverter}}"/>
-                <TextBlock Text="Файл (.exe):" Grid.Row="0" Grid.Column="1"/>
-                <Button Content="Выбрать" Command="{Binding PinSecureCRTCommand}" Grid.Column="2" Grid.Row="0" Margin="5 0 0 2" HorizontalAlignment="Right" />
-            </Grid>
-        </GroupBox>
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
-            <Button Content="Сохранить" Command="{Binding SaveCommand}" Click="Close_Click" HorizontalAlignment="Right" Style="{StaticResource AccentButtonStyle}"/>
-            <Button Content="Отмена" Click="Close_Click" HorizontalAlignment="Right" Margin="5 0 0 0"/>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="230"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid.Resources>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource BodyTextBlockStyle}">
+                    <Setter Property="Margin" Value="1"/>
+                    <Setter Property="FontSize" Value="13"/>
+                    <Setter Property="TextAlignment" Value="Left"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>
+            </Grid.Resources>
+            <!--Account-->
+            <GroupBox Style="{DynamicResource none}" Grid.Column="0" Margin="5 0 1 0" Padding="5">
+                <GroupBox.Header>
+                    <TextBlock Text="Equipment account:" Style="{StaticResource BaseTextBlockStyle}"/>
+                </GroupBox.Header>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="User name:" Grid.Row="0"/>
+                    <TextBox Text="{Binding UserName}" Grid.Column="1" Grid.Row="0" Margin="5 0 0 2" />
+                    <TextBlock Text="Password:" Grid.Row="1"/>
+                    <TextBox Text="{Binding Password}" Grid.Column="1" Grid.Row="1" Margin="5 2 0 0"/>
+                </Grid>
+            </GroupBox>
+            <!--SecureCRT-->
+            <GroupBox Style="{DynamicResource none}" Grid.Row="1" Grid.Column="0" Margin="5 0 1 0" Padding="5">
+                <GroupBox.Header>
+                    <TextBlock Text="SecureCRT (optional):" Style="{StaticResource BaseTextBlockStyle}"/>
+                </GroupBox.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding IsPathSecureCRT, Converter={StaticResource BooleanToSymbolConverter}}" Grid.Row="0" Grid.Column="0"
+                           Foreground="{Binding IsPathSecureCRT, Converter={StaticResource BooleanToForegroundConverter}}"/>
+                    <TextBlock Text="Path:" Grid.Row="0" Grid.Column="1"/>
+                    <Button Content="Select" Command="{Binding SelectSecureCRTCommand}" Grid.Column="2" Grid.Row="0" Margin="5 0 0 2" HorizontalAlignment="Right" />
+                </Grid>
+            </GroupBox>
+            <!--Base-->
+            <GroupBox Style="{DynamicResource none}" Grid.RowSpan="2" Grid.Column="1" Margin="1 0 5 0" Padding="5">
+                <GroupBox.Header>
+                    <TextBlock Text="Equipment base:" Style="{StaticResource BaseTextBlockStyle}"/>
+                </GroupBox.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="{Binding IsPathBase, Converter={StaticResource BooleanToSymbolConverter}}"
+                           Foreground="{Binding IsPathBase, Converter={StaticResource BooleanToForegroundConverter}}"/>
+                        <TextBlock Text="{Binding IsBase, Converter={StaticResource BooleanToSymbolConverter}}"
+                           Foreground="{Binding IsBase, Converter={StaticResource BooleanToForegroundConverter}}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Path (*.json):"/>
+                        <TextBlock Text="Uploaded"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <Button Content="Select" Command="{Binding SelectBaseCommand}" Grid.Column="2" Grid.Row="0" Margin="5 0 0 2" HorizontalAlignment="Right" />
+                    </StackPanel>
+                    
+                </Grid>
+            </GroupBox>
+        </Grid>
+        <!--Footer-->
+        <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Left" Margin="7 0 0 5" Opacity="0.4" VerticalAlignment="Bottom">
+            <TextBlock ToolTip="Mail to">
+                <Hyperlink NavigateUri="mailto:Rasim.Bakhtiyarov@tattelecom.ru" RequestNavigate="Hyperlink_RequestNavigate">
+                    Rasim Bakhtiyarov
+                </Hyperlink>
+            </TextBlock>
+            <TextBlock Text="{Binding Version, StringFormat='TelnetTS {0}'}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
+            <Button Content="Save" Command="{Binding SaveCommand}" Click="Close_Click" HorizontalAlignment="Right" Style="{StaticResource AccentButtonStyle}"/>
+            <Button Content="Cancel" Click="Close_Click" HorizontalAlignment="Right" Margin="5 0 0 0"/>
         </StackPanel>
     </Grid>
 </Window>

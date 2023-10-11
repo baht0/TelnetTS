@@ -105,6 +105,7 @@ namespace TelnetTS.MVVM.Model
             }
         }
 
+        //Logs
         private List<Log> InitialLogs { get; set; } = new List<Log>();
         protected void LogsAdd(string message, bool important = true)
         {
