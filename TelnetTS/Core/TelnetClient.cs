@@ -16,27 +16,20 @@ namespace TelnetInfo.Core
 
         public async Task ConnectionAsync(string ip, string user, string pass)
         {
-            try
+            Client = new TcpClient();
+            await Client.ConnectAsync(ip, 23);
+            NetworkStream stream = Client.GetStream();
+            Reader = new StreamReader(stream);
+            Writer = new StreamWriter(stream)
             {
-                Client = new TcpClient();
-                await Client.ConnectAsync(ip, 23);
-                NetworkStream stream = Client.GetStream();
-                Reader = new StreamReader(stream);
-                Writer = new StreamWriter(stream)
-                {
-                    AutoFlush = true
-                };
-                await Reader.ReadLineAsync();
+                AutoFlush = true
+            };
+            await Reader.ReadLineAsync();
 
-                await Writer.WriteLineAsync(user);
-                await Writer.WriteLineAsync(pass);
-                await Task.Delay(500);
-                await Writer.WriteLineAsync("\r\n");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
+            await Writer.WriteLineAsync(user);
+            await Writer.WriteLineAsync(pass);
+            await Task.Delay(500);
+            await Writer.WriteLineAsync("\r\n");
         }
         public void Disconnect()
         {
