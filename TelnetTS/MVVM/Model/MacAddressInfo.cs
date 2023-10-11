@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using TelnetInfo.Core;
 using TelnetTS.Helper;
@@ -9,16 +10,26 @@ namespace TelnetTS.MVVM.Model
 {
     public class MacAddressInfo : ObservableObject
     {
-        public string Mac
+        public string Mac1
         {
-            get => mac;
+            get => mac1;
             set
             {
-                mac = value;
+                mac1 = value;
                 OnPropertyChanged();
             }
         }
-        private string mac = "-";
+        private string mac1 = "-";
+        public string Mac2
+        {
+            get => mac2;
+            set
+            {
+                mac2 = value;
+                OnPropertyChanged();
+            }
+        }
+        private string mac2 = "-";
         public string Vendor
         {
             get => vendor;
@@ -42,8 +53,8 @@ namespace TelnetTS.MVVM.Model
 
         public void Main(string mac)
         {
-            mac = string.Join(":", ResponseReader.SplitByLength(mac.Replace(".", string.Empty), 2));
-            Mac = mac;
+            Mac1 = string.Join(":", ResponseReader.SplitByLength(mac.Replace(".", string.Empty), 2));
+            Mac2 = string.Join("-", ResponseReader.SplitByLength(mac.Replace(".", string.Empty), 4));
             ManufacturerDefinition(mac);
         }
         private async void ManufacturerDefinition(string macAddress)
