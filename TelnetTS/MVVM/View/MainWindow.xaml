@@ -7,7 +7,7 @@
         xmlns:conv="clr-namespace:TelnetTS.Converters"
         mc:Ignorable="d" KeyDown="Window_KeyDown"
         Title="TelnetTS" FontSize="12" ResizeMode="CanMinimize"
-        Height="465" Width="650" StateChanged="Window_StateChanged"
+        Height="465" Width="650"
         WindowStartupLocation="CenterScreen" Closing="Window_Closing"
         xmlns:vm="clr-namespace:TelnetTS.MVVM.ViewModel"
         xmlns:ui="http://schemas.modernwpf.com/2019"
@@ -40,6 +40,9 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
+            <Menu>
+                <MenuItem Header="awd"/>
+            </Menu>
             <!--Loaded Data-->
             <Grid Grid.Row="0">
                 <Grid.RowDefinitions>
@@ -55,13 +58,14 @@
                 <Grid Background="{StaticResource ButtonBackgroundPointerOver}">
                     <TextBlock Text="Общая информация" Margin="5" Style="{StaticResource SubtitleTextBlockStyle}"/>
                     <ui:CommandBar HorizontalAlignment="Right">
-                        <ui:AppBarButton Icon="List" Label="Консоль" Click="ConsoleButton_Click"/>
+                        <ui:AppBarButton Icon="List" Label="Console" Click="ConsoleButton_Click"/>
+                        <ui:AppBarButton Icon="Setting" Label="Settings" Click="Setting_Click"/>
                     </ui:CommandBar>
                 </Grid>
                 <!--Info-->
                 <Grid Grid.Row="1" Background="{StaticResource SystemControlBackgroundChromeMediumLowBrush}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="100"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="5 0 0 0">
@@ -72,10 +76,10 @@
                                 <Setter Property="VerticalAlignment" Value="Center"/>
                             </Style>
                         </StackPanel.Resources>
-                        <TextBlock Text="Логин:"/>
-                        <TextBlock Text="Mac-адрес:"/>
-                        <TextBlock Text="Дата и время:"/>
-                        <TextBlock Text="Оборудование:"/>
+                        <TextBlock Text="Login:"/>
+                        <TextBlock Text="Date time:"/>
+                        <TextBlock Text="Mac-address:"/>
+                        <TextBlock Text="Manufacturer:"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="5 0 0 0">
                         <StackPanel.Resources>
@@ -86,8 +90,12 @@
                             </Style>
                         </StackPanel.Resources>
                         <TextBlock Text="{Binding Data.Login}" Cursor="Hand" MouseLeftButtonDown="dataCopy_MouseLeftButtonDown" ToolTip="Скопировать"/>
-                        <TextBlock Text="{Binding Data.MacAddressInfo.Mac}" Cursor="Hand" MouseLeftButtonDown="dataCopy_MouseLeftButtonDown" ToolTip="Скопировать"/>
                         <TextBlock Text="{Binding Data.DateTime}" Opacity="0.6"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Data.MacAddressInfo.Mac1}" Cursor="Hand" MouseLeftButtonDown="dataCopy_MouseLeftButtonDown" ToolTip="Скопировать"/>
+                            <TextBlock Text="|"/>
+                            <TextBlock Text="{Binding Data.MacAddressInfo.Mac2}" Cursor="Hand" MouseLeftButtonDown="dataCopy_MouseLeftButtonDown" ToolTip="Скопировать"/>
+                        </StackPanel>
                         <TextBlock>
                             <Hyperlink NavigateUri="{Binding Data.Axiros}" RequestNavigate="Hyperlink_RequestNavigate" TextDecorations="None" ToolTip="Перейти в AXIROS">
                                 <TextBlock Text="{Binding Data.MacAddressInfo.Vendor}" Style="{StaticResource BodyTextBlockStyle}"/>
@@ -112,24 +120,24 @@
                 <Grid Background="{StaticResource ButtonBackgroundPointerOver}">
                     <TextBlock Text="Последняя миля" Margin="5" Style="{StaticResource SubtitleTextBlockStyle}"/>
                     <ui:CommandBar HorizontalAlignment="Right">
-                        <ui:AppBarButton Icon="Setting" Label="Настройки" Click="Setting_Click"/>
                         <ui:AppBarButton Icon="Copy" Label="Copy" Command="{Binding ConnectPoint.CopyCommand}"/>
                         <ui:AppBarButton Icon="Clear" Label="Reboot" Command="{Binding ConnectPoint.RebootRequestCommand}"/>
-                        <ui:AppBarButton Icon="Refresh" Label="Обновить" Command="{Binding ConnectPoint.RefreshRequestCommand}"/>
+                        <ui:AppBarButton Icon="Refresh" Label="Refresh" Command="{Binding ConnectPoint.RefreshRequestCommand}"/>
                     </ui:CommandBar>
                     <ProgressBar IsIndeterminate="True" VerticalAlignment="Bottom" Visibility="{Binding ConnectPoint.IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                 </Grid>
                 <!--Info-->
                 <Grid Grid.Row="1" Background="{StaticResource SystemControlBackgroundChromeMediumLowBrush}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="100"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Grid.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Открыть" Command="{Binding OpenCommand}"/>
+                            <MenuItem Header="Open" Command="{Binding ConnectPoint.OpenCommand}"/>
                             <Separator/>
-                            <MenuItem Header="Пинги" Command="{Binding PingCommand}"/>
+                            <MenuItem Header="Ping in cmd" Command="{Binding ConnectPoint.PingCommand}"/>
+                            <MenuItem Header="Incident" Command="{Binding ConnectPoint.CheckIncidentsCommand}"/>
                         </ContextMenu>
                     </Grid.ContextMenu>
                     <StackPanel Grid.Column="0" Margin="5 0 0 0">
@@ -140,10 +148,10 @@
                                 <Setter Property="VerticalAlignment" Value="Center"/>
                             </Style>
                         </StackPanel.Resources>
-                        <TextBlock Text="Оборудование:"/>
+                        <TextBlock Text="Connection:"/>
                         <TextBlock Text="Link:"/>
                         <TextBlock Text="Up-time:"/>
-                        <TextBlock Text="Тип:"/>
+                        <TextBlock Text="Type:"/>
                     </StackPanel>
                     <!--Binding-->
                     <StackPanel Grid.Column="1" Margin="5 0 0 0">
@@ -202,16 +210,16 @@
                 <Grid Background="{StaticResource ButtonBackgroundPointerOver}">
                     <TextBlock Text="Текущая сессия" Margin="5" Style="{StaticResource SubtitleTextBlockStyle}"/>
                     <ui:CommandBar HorizontalAlignment="Right">
-                        <ui:AppBarButton Icon="Find" Label="Найти" Command="{Binding Session.FindRequestCommand}"/>
-                        <ui:AppBarButton Icon="Clear" Label="Сбросить" Command="{Binding Session.ResetRequestCommand}"/>
-                        <ui:AppBarButton Icon="Refresh" Label="Обновить" Command="{Binding Session.RefreshRequestCommand}"/>
+                        <ui:AppBarButton Icon="Copy" Label="Copy" Command="{Binding Session.CopyCommand}"/>
+                        <ui:AppBarButton Icon="Clear" Label="Reset" Command="{Binding Session.ResetRequestCommand}"/>
+                        <ui:AppBarButton Icon="Refresh" Label="Refresh" Command="{Binding Session.RefreshRequestCommand}"/>
                     </ui:CommandBar>
                     <ProgressBar IsIndeterminate="True" VerticalAlignment="Bottom" Visibility="{Binding Session.IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                 </Grid>
                 <!--Info-->
                 <Grid Grid.Row="1" Background="{StaticResource SystemControlBackgroundChromeMediumLowBrush}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="100"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="5 0 0 0">
@@ -222,10 +230,10 @@
                                 <Setter Property="VerticalAlignment" Value="Center"/>
                             </Style>
                         </StackPanel.Resources>
-                        <TextBlock Text="Оборудование:"/>
-                        <TextBlock Text="Статус:"/>
+                        <TextBlock Text="Connection:"/>
+                        <TextBlock Text="Status:"/>
                         <TextBlock Text="Up-time:"/>
-                        <TextBlock Text="Тариф:"/>
+                        <TextBlock Text="Rate:"/>
                     </StackPanel>
                     <!--Binding-->
                     <StackPanel Grid.Column="1" Margin="5 0 0 0">
