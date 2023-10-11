@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
-using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Input;
 using TelnetInfo.Core;
 using TelnetTS.Helper;
+using TelnetTS.MVVM.View;
 using TelnetTS.Properties;
 
 namespace TelnetTS.MVVM.Model
@@ -47,7 +48,7 @@ namespace TelnetTS.MVVM.Model
             }
         }
         private string port = "-";
-        private string Mac
+        public string Mac
         {
             get => mac;
             set
@@ -166,24 +167,6 @@ namespace TelnetTS.MVVM.Model
             });
             bool imp = success != packets || (avg / packets) > 50;
             LogsAdd($"Пинги {success}/{packets}; min: {min}ms, max: {max}ms, avg: {avg / packets}ms.", imp);
-            if (imp && TypeSwitch != Switches.Huawei5800)
-                await CheckIncident();
-        }
-        private async Task CheckIncident()
-        {
-            try
-            {
-                var httpClient = new HttpClient();
-                httpClient.DefaultRequestHeaders.Clear();
-                var res = await httpClient.GetStringAsync("http://192.168.114.142:3000/api/get_incidents?isGou=false&fix=true&mob=true&type=open&zues=%D0%92%D1%81%D0%B5+%D0%97%D0%A3%D0%AD%D0%A1&rues=%D0%92%D1%81%D0%B5+%D0%A0%D0%A3%D0%AD%D0%A1");
-
-                if (res.Contains(IP.Remove(0, 3)))
-                    LogsAdd("Обнаружен инцидент.");
-            }
-            catch
-            {
-                LogsAdd("Произошла ошибка при проверке инцидента.", false);
-            }
         }
 
         //Launch
@@ -386,6 +369,7 @@ namespace TelnetTS.MVVM.Model
                             string[] str = ResponseReader.SplitLine(line);
                             if (str.Length > 2 && (str[1].Contains("up") || str[2].Contains("up")))
                             {
+                                Copy.AppendLine(line);
                                 IsActive = true;
                                 string time = string.Empty;
                                 var id = Array.IndexOf(str, str.FirstOrDefault(x => x.Contains("adsl") || x.Contains("gdmt")));
@@ -400,6 +384,7 @@ namespace TelnetTS.MVVM.Model
                             string[] str = ResponseReader.SplitLine(line);
                             if (str.Length > 2 && str[0] == Port && str[1] == "V")
                             {
+                                Copy.AppendLine(line);
                                 IsActive = true;
                                 UpTime = TimeSpanParser.Main(str[str.Length - 2]);
                             }
@@ -644,9 +629,9 @@ namespace TelnetTS.MVVM.Model
             new RelayCommand(async (obj) =>
             {
                 Copy.Clear();
+                LogsClear();
                 IsActive = false;
                 UpTime = new TimeSpan();
-                LogsClear();
 
                 PingSwitch();
                 await CheckRequest();
@@ -708,5 +693,51 @@ namespace TelnetTS.MVVM.Model
                 IsBusy = false;
             }
         }
+
+        //Context menu
+        public ICommand OpenCommand =>
+            new RelayCommand((obj) =>
+            {
+                var pathExe = Settings.Default.PathSecureCRT;
+                var startInfo = new ProcessStartInfo
+                {
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    FileName = "cmd.exe",
+                    Arguments = $"/C {pathExe} /nomenu /telnet {IP}"
+                };
+                var process = new Process
+                {
+                    StartInfo = startInfo
+                };
+                process.Start();
+
+            }, (obj) => !string.IsNullOrEmpty(Settings.Default.PathSecureCRT) && IP != "-");
+        public ICommand PingCommand =>
+            new RelayCommand((obj) =>
+            {
+                Process.Start("cmd.exe", $"/K ping {IP} -t");
+            }, (obj) => IP != "-");
+        public ICommand CheckIncidentsCommand =>
+            new RelayCommand(async (obj) =>
+            {
+                try
+                {
+                    var incidentData = new IncidentData();
+                    var list = await Task.Run(() => incidentData.UpdateAsync());                   
+
+                    var incident = list.FirstOrDefault(x => (!string.IsNullOrEmpty(x.IP) && x.IP.Contains(IP)) || x.Problem.Contains(IP.Remove(0, 3)));
+                    if (incident != null)
+                    {
+                        var win = new IncidentWindow(incident);
+                        win.ShowDialog();
+                    }
+                    else
+                        LogsAdd("Инцидент не обнаружен.", false);
+                }
+                catch (Exception ex)
+                {
+                    LogsAdd("Произошла ошибка при проверке инцидента.");
+                }
+            }, (obj) => !string.IsNullOrEmpty(IP) && IP != "-");
     }
 }
