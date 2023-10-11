@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using TelnetTS.MVVM.ViewModel;
 
 namespace TelnetTS.MVVM.View
@@ -22,6 +23,12 @@ namespace TelnetTS.MVVM.View
                 ResultTextbox.SetBinding(TextBox.TextProperty, binding);
                 MyScrollViewer.ScrollToBottom();
             }
+        }
+
+        private void consoleWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+                Close();
         }
     }
 }

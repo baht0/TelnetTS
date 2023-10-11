@@ -8,7 +8,7 @@
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen" x:Name="consoleWindow"
         Title="Console" MinHeight="450" MinWidth="700"
-        Height="450" Width="700" ShowInTaskbar="False"
+        Height="450" Width="700" KeyDown="consoleWindow_KeyDown"
         ui:WindowHelper.UseModernWindowStyle="False"
         Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}"
         Foreground="{DynamicResource SystemControlPageTextBaseHighBrush}"

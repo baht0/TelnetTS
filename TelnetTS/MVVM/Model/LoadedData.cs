@@ -116,6 +116,6 @@ namespace TelnetTS.MVVM.Model
         }
 
         public SessionData GetSessionData() => new SessionData(RadiusData.Nas, RadiusData.Login, RadiusData.Result);
-        public ConnectPoint GetConnectPoint() => new ConnectPoint(RadiusData.Point, MacAddressInfo.Mac);
+        public ConnectPoint GetConnectPoint() => new ConnectPoint(RadiusData.Point, MacAddressInfo.Mac1);
     }
 }
